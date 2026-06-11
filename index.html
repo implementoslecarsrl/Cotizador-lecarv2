@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">
+<title>Lecar Cotizador</title>
+<meta name="theme-color" content="#1565C0">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Lecar Cotizador">
+<link rel="manifest" href="manifest.json">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<link rel="apple-touch-icon" href="icon-192x192.png">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bl:#1565C0;--bll:#E3F2FD;--blm:#1976D2;
+  --gn:#2E7D32;--gnl:#E8F5E9;--gnm:#388E3C;
+  --gy:#f5f5f5;--gy2:#e0e0e0;--gy3:#9e9e9e;--gy4:#424242;
+  --wh:#fff;--tx:#212121;--red:#C62828;
+  --rad:12px;--rads:8px;--sh:0 2px 8px rgba(0,0,0,.10);
+}
+body{font-family:Arial,sans-serif;background:#ECEFF1;color:var(--tx);min-height:100vh;padding-bottom:40px}
+.hdr{background:var(--bl);padding:14px 16px 12px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100;box-shadow:var(--sh)}
+.hdr img{height:44px;width:auto;background:#fff;border-radius:6px;padding:3px 6px}
+.hdr-t{color:#fff}
+.hdr-t h1{font-size:15px;font-weight:700;line-height:1.2}
+.hdr-t p{font-size:11px;opacity:.8;margin-top:2px}
+.wrap{max-width:680px;margin:0 auto;padding:14px 12px}
+.card{background:var(--wh);border-radius:var(--rad);box-shadow:var(--sh);padding:16px;margin-bottom:12px}
+.ctit{font-size:11px;font-weight:700;color:var(--bl);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.ctit::before{content:'';display:inline-block;width:3px;height:14px;background:var(--bl);border-radius:2px}
+.fld{margin-bottom:10px}
+.fld label{font-size:12px;color:var(--gy3);display:block;margin-bottom:4px;font-weight:700}
+.fld input,.fld select{width:100%;padding:11px 12px;border:1.5px solid var(--gy2);border-radius:var(--rads);font-size:15px;color:var(--tx);background:var(--wh);appearance:auto}
+.fld input:focus,.fld select:focus{outline:none;border-color:var(--bl)}
+.r2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.bgrp{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.bopt{flex:1;min-width:calc(50% - 4px);padding:11px 6px;border:2px solid var(--gy2);border-radius:var(--rads);background:var(--wh);color:var(--gy4);font-size:13px;font-weight:700;cursor:pointer;text-align:center;transition:all .15s;line-height:1.2}
+.bopt:active{transform:scale(.97)}
+.bopt.on{border-color:var(--bl);background:var(--bll);color:var(--bl)}
+.bopt .pct{display:block;font-size:11px;font-weight:400;opacity:.7;margin-top:2px}
+.biva{flex:1;padding:10px 4px;border:2px solid var(--gy2);border-radius:var(--rads);background:var(--wh);color:var(--gy4);font-size:12px;font-weight:700;cursor:pointer;text-align:center;transition:all .15s;line-height:1.3}
+.biva.on{border-color:var(--gn);background:var(--gnl);color:var(--gn)}
+.pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.pill{padding:9px 14px;border:2px solid var(--gy2);border-radius:20px;background:var(--wh);color:var(--gy4);font-size:13px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:6px;user-select:none}
+.pill:active{transform:scale(.96)}
+.pill.on{border-color:var(--gn);background:var(--gnl);color:var(--gnm)}
+.pill.on-neg{border-color:var(--red);background:#FFEBEE;color:var(--red)}
+.pill .pp{font-size:11px;opacity:.75;margin-left:2px}
+.pill .ck{width:16px;height:16px;border:2px solid currentColor;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px}
+.pill.on .ck::after,.pill.on-neg .ck::after{content:'\2713'}
+.spec-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #f5f5f5;font-size:14px;color:#424242}
+.spec-row:last-child{border-bottom:none}
+.esp-item{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #f0f0f0;font-size:13px}
+.esp-item:last-child{border-bottom:none}
+.esp-desc{flex:1;color:var(--tx)}
+.esp-price{font-weight:700;color:var(--gn);min-width:110px;text-align:right;font-size:13px}
+.esp-del{background:none;border:none;color:var(--gy3);cursor:pointer;font-size:16px;padding:0 4px;line-height:1}
+.esp-del:hover{color:var(--red)}
+.mod-qty-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #f5f5f5}
+.mod-qty-row:last-child{border-bottom:none}
+.mod-qty-label{flex:1;font-size:13px;color:var(--tx)}
+.mod-unit{font-size:11px;color:var(--gy3);display:block;margin-top:2px}
+.mod-qty-ctrl{display:flex;align-items:center;gap:8px}
+.mod-qty-ctrl button{width:32px;height:32px;border:1.5px solid var(--gy2);border-radius:var(--rads);background:var(--wh);color:var(--tx);font-size:18px;font-weight:700;cursor:pointer}
+.mod-qty-ctrl button:active{background:var(--gy)}
+.mod-qty-ctrl span{font-size:16px;font-weight:700;min-width:24px;text-align:center;color:var(--tx)}
+.mod-qty-total{font-size:13px;font-weight:700;color:var(--gn);min-width:90px;text-align:right}
+.btn-luces{padding:8px 14px;border:2px solid var(--gy2);border-radius:20px;background:var(--wh);color:var(--gy4);font-size:13px;cursor:pointer;font-weight:400;transition:all .15s}
+.btn-luces:active{transform:scale(.96)}
+.btn-luces.on{border-color:var(--gn);background:var(--gnl);color:var(--gnm);font-weight:700}
+.spec-dot{width:7px;height:7px;border-radius:50%;background:var(--bl);flex-shrink:0}
+.drow{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #f5f5f5}
+.drow:last-child{border-bottom:none}
+.dl{color:var(--gy3);font-size:14px}
+.dv{font-weight:700;font-size:14px}
+.dv.neg{color:var(--red)}
+.dv.pos{color:var(--gn)}
+.dv.base{color:var(--tx)}
+.tbox{background:var(--bl);border-radius:var(--rads);padding:16px;margin-top:14px;color:#fff;display:flex;justify-content:space-between;align-items:center}
+.tbox .tl{font-size:13px;opacity:.85}
+.tbox .tv{font-size:28px;font-weight:700}
+.tbox .tb{font-size:11px;background:rgba(255,255,255,.2);border-radius:4px;padding:2px 7px;margin-top:4px;display:inline-block}
+.acts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:14px}
+.ba{padding:13px 8px;border:none;border-radius:var(--rads);font-size:13px;font-weight:700;cursor:pointer;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px}
+.ba .ico{font-size:20px}
+.bwsp{background:#25D366;color:#fff}
+.bmail{background:var(--bl);color:#fff}
+.breset{background:var(--gy);color:var(--gy4);border:1.5px solid var(--gy2)}
+.bpdf{background:var(--red);color:#fff}
+.empty{text-align:center;padding:24px 0;color:var(--gy3);font-size:14px}
+.div2{font-size:11px;font-weight:700;color:var(--gy3);text-transform:uppercase;letter-spacing:.06em;margin:14px 0 8px;padding-left:4px}
+#ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;align-items:center;justify-content:center;padding:16px}
+#ov.show{display:flex}
+#ovbox{background:#fff;border-radius:var(--rad);padding:16px;max-width:420px;width:100%;text-align:center}
+#ovbox img{max-width:100%;border:1px solid var(--gy2);border-radius:var(--rads);margin-bottom:12px}
+#ovbox p{font-size:13px;color:var(--gy3);margin-bottom:12px}
+.bdl{background:var(--gn);color:#fff;border:none;border-radius:var(--rads);padding:11px 20px;font-size:14px;font-weight:700;cursor:pointer;width:100%;margin-bottom:8px}
+.bcov{background:var(--gy);color:var(--gy4);border:1px solid var(--gy2);border-radius:var(--rads);padding:9px 20px;font-size:13px;cursor:pointer;width:100%}
+@media(max-width:400px){.bopt{font-size:12px}.tbox .tv{font-size:22px}}
+@media print{.hdr{position:static}.acts,.breset,#ov{display:none}body{background:#fff}}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <img id="logo" alt="Lecar">
+  <div class="hdr-t"><h1>Cotizador Lecar</h1><p>Lista N&#176;57 &middot; desde 02/02/2026</p></div>
+</div>
+<div class="wrap">
+
+  <div class="card">
+    <div class="ctit">Datos</div>
+    <div class="r2">
+      <div class="fld"><label>Cliente</label><input type="text" id="cliente" placeholder="Nombre"></div>
+      <div class="fld"><label>N&#176; Cotizaci&#243;n</label><input type="text" id="nrocot" readonly style="background:#f5f5f5;color:#424242;cursor:default"></div>
+    </div>
+    <div class="r2">
+      <div class="fld"><label>Tel&#233;fono</label><input type="tel" id="telefono" placeholder="Ej: 3471-123456" inputmode="numeric"></div>
+      <div class="fld"><label>Localidad</label><input type="text" id="localidad" placeholder="Ej: Armstrong"></div>
+    </div>
+    <div class="r2">
+      <div class="fld"><label>Vendedor</label>
+        <select id="vendedor" onchange="onVendedor()">
+          <option value="">&#8212; Seleccion&#225; &#8212;</option>
+          <option value="Matias">Mat&#237;as Gonz&#225;lez</option>
+          <option value="Lucas">Lucas Di Perna</option>
+          <option value="Nicolas">Nicol&#225;s Errasti</option>
+        </select>
+      </div>
+      <div class="fld"><label>Fecha</label><input type="text" id="fecha"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ctit">Producto</div>
+    <div class="fld"><label>Categor&#237;a</label><select id="cat" onchange="onCat()"></select></div>
+    <div class="fld"><label>Variante</label><select id="var" onchange="onVar()"></select></div>
+  </div>
+
+  <div class="card" id="specs-card" style="display:none">
+    <div class="ctit">Ficha t&#233;cnica</div>
+    <div id="specs-list"></div>
+  </div>  <!-- PRODUCTO PERSONALIZADO -->
+  <div class="card" id="custom-card" style="display:none">
+    <div class="ctit">&#9998; Datos del producto personalizado</div>
+    <div class="fld">
+      <label>Nombre del producto</label>
+      <input type="text" id="custom-nombre" placeholder="Ej: Acoplado tolva especial 3 ejes" oninput="updateCustom()">
+    </div>
+    <div class="fld">
+      <label>Descripci&#243;n / Ficha t&#233;cnica</label>
+      <textarea id="custom-desc" rows="4" placeholder="Detall&#225; especificaciones, dimensiones, materiales, equipamiento..." oninput="updateCustom()" style="width:100%;padding:11px 12px;border:1.5px solid var(--gy2);border-radius:var(--rads);font-size:14px;color:var(--tx);background:var(--wh);resize:vertical;font-family:Arial,sans-serif"></textarea>
+    </div>
+    <div class="fld">
+      <label>Precio base $</label>
+      <input type="number" id="custom-precio" placeholder="0" min="0" oninput="updateCustom()" style="font-size:18px;font-weight:700">
+    </div>
+    <div id="custom-preview" style="display:none;margin-top:8px;background:var(--acl,#E3F2FD);border-radius:var(--rads);padding:10px 12px;font-size:13px;color:var(--gy4)"></div>
+  </div>
+
+
+
+  <div class="card" id="opc-card" style="display:none">
+    <div class="ctit">Opcionales</div>
+    <div class="pills" id="opc-pills"></div>
+  </div>
+
+  <div class="card">
+    <div class="ctit" onclick="toggleMod()" style="cursor:pointer;justify-content:space-between;display:flex;align-items:center">
+      <span style="display:flex;align-items:center;gap:6px"><span style="display:inline-block;width:3px;height:14px;background:var(--bl);border-radius:2px"></span>Modificadores y accesorios</span>
+      <span id="mod-arrow" style="font-size:14px;color:var(--gy3);transition:transform .2s">&#9660;</span>
+    </div>
+    <div id="mod-body" style="display:none;margin-top:8px">
+
+      <div style="font-size:11px;font-weight:700;color:var(--gy3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Accesorios generales</div>
+      <div class="pills" id="acc-pills"></div>
+
+      <div style="margin-top:14px;padding-top:12px;border-top:1px solid #f0f0f0">
+        <div style="font-size:11px;font-weight:700;color:var(--gy3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">Con selector de cantidad</div>
+
+        <!-- Llantas 17 -->
+        <div class="mod-qty-row">
+          <span class="mod-qty-label">Dif. llanta 17 <span class="mod-unit">$ 55.000 c/u</span></span>
+          <div class="mod-qty-ctrl">
+            <button onclick="adjQty('llanta',-1)">&#8722;</button>
+            <span id="llanta-qty">0</span>
+            <button onclick="adjQty('llanta',1)">+</button>
+          </div>
+          <span class="mod-qty-total" id="llanta-tot"></span>
+        </div>
+
+        <!-- Baul lateral general -->
+        <div class="mod-qty-row">
+          <span class="mod-qty-label">Ba&#250;l lateral <span class="mod-unit">$ 433.500 c/u</span></span>
+          <div class="mod-qty-ctrl">
+            <button onclick="adjQty('baul',-1)">&#8722;</button>
+            <span id="baul-qty">0</span>
+            <button onclick="adjQty('baul',1)">+</button>
+          </div>
+          <span class="mod-qty-total" id="baul-tot"></span>
+        </div>
+
+        <!-- Baul lateral 1.55m solo en combinados 5000+ -->
+        <div class="mod-qty-row">
+          <span class="mod-qty-label">Ba&#250;l lateral 1.55m <span class="mod-unit">$ 251.050 c/u</span></span>
+          <div class="mod-qty-ctrl">
+            <button onclick="adjQty('baul155',-1)">&#8722;</button>
+            <span id="baul155-qty">0</span>
+            <button onclick="adjQty('baul155',1)">+</button>
+          </div>
+          <span class="mod-qty-total" id="baul155-tot"></span>
+        </div>
+
+        <!-- Luces -->
+        <div class="mod-qty-row">
+          <span class="mod-qty-label">Diferencia por luces</span>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
+            <button onclick="toggleLuces('lucesVolc')" id="btn-lucesVolc" class="btn-luces">Volcador $ 261.250</button>
+            <button onclick="toggleLuces('lucesTolva')" id="btn-lucesTolva" class="btn-luces">Tolva grande $ 310.000</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ctit">&#9881; &#205;tems especiales</div>
+    <div id="esp-list"></div>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-top:10px">
+      <input type="text" id="esp-desc" placeholder="Descripción (ej: ejes especiales reforzados)" style="width:100%;padding:10px 12px;border:1.5px solid var(--gy2);border-radius:var(--rads);font-size:14px;background:var(--wh);color:var(--tx)">
+      <div style="display:flex;gap:8px">
+        <input type="number" id="esp-precio" placeholder="Precio $" style="flex:1;padding:10px 12px;border:1.5px solid var(--gy2);border-radius:var(--rads);font-size:14px;background:var(--wh);color:var(--tx)" min="0">
+        <button onclick="addEsp()" style="padding:10px 20px;background:var(--bl);border:none;border-radius:var(--rads);color:#fff;font-weight:700;font-size:14px;cursor:pointer;white-space:nowrap">+ Agregar</button>
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--gy3);margin-top:6px">Los &#237;tems especiales se suman al subtotal y reciben los mismos descuentos e IVA.</div>
+  </div>
+
+  <div class="card">
+    <div class="ctit">&#128274; Otros costos de cliente</div>
+    <div style="font-size:12px;color:var(--gy3);margin-bottom:10px">Se suma al total pero no aparece en el detalle visible al cliente.</div>
+    <div id="occ-list"></div>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-top:10px">
+      <input type="text" id="occ-desc" placeholder="Descripci&#243;n interna (no visible al cliente)" style="width:100%;padding:10px 12px;border:1.5px solid var(--gy2);border-radius:var(--rads);font-size:14px;background:var(--wh);color:var(--tx)">
+      <div style="display:flex;gap:8px">
+        <input type="number" id="occ-precio" placeholder="Monto $" style="flex:1;padding:10px 12px;border:1.5px solid var(--gy2);border-radius:var(--rads);font-size:14px;background:var(--wh);color:var(--tx)" min="0">
+        <button onclick="addOcc()" style="padding:10px 20px;background:var(--bl);border:none;border-radius:var(--rads);color:#fff;font-weight:700;font-size:14px;cursor:pointer;white-space:nowrap">+ Agregar</button>
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--gy3);margin-top:6px">&#9888; Solo visible en registros internos (Google Sheets).</div>
+  </div>
+
+  <div class="card">
+    <div class="ctit">Tipo de precio</div>
+    <div class="bgrp">
+      <button class="bopt on" data-v="lista" onclick="selT(this)">LISTA<span class="pct">sin descuento</span></button>
+      <button class="bopt" data-v="conc" onclick="selT(this)">CONCESIONARIO<span class="pct">&#8722;15%</span></button>
+      <button class="bopt" data-v="contado" onclick="selT(this)">CONTADO<span class="pct">&#8722;10%</span></button>
+      <button class="bopt" data-v="cc" onclick="selT(this)">CONC + CONTADO<span class="pct">&#8722;23.5% cascada</span></button>
+    </div>
+    <div class="div2" style="margin-top:16px">IVA (10.5%)</div>
+    <div class="bgrp">
+      <button class="biva on" data-v="sin" onclick="selI(this)">SIN IVA<span style="display:block;font-size:10px;font-weight:400;margin-top:2px">como est&#225; en lista</span></button>
+      <button class="biva" data-v="mas" onclick="selI(this)">+ IVA<span style="display:block;font-size:10px;font-weight:400;margin-top:2px">sumar 10.5%</span></button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ctit">Desglose</div>
+    <div id="desglose"><div class="empty">Seleccion&#225; un producto</div></div>
+  </div>
+
+  <div class="card">
+    <div class="ctit">&#128179; Forma de pago</div>
+    <div class="fld">
+      <label>Condici&#243;n</label>
+      <select id="forma-pago" onchange="onFormaPago()">
+        <option value="">&#8212; Seleccion&#225; &#8212;</option>
+        <option value="contado">Contado</option>
+        <option value="0-30">0 / 30</option>
+        <option value="0-30-60">0 / 30 / 60</option>
+        <option value="0-30-60-90">0 / 30 / 60 / 90</option>
+        <option value="0-30-60-90-120">0 / 30 / 60 / 90 / 120</option>
+        <option value="0-30-60-90-120-150">0 / 30 / 60 / 90 / 120 / 150</option>
+        <option value="0-30-60-90-120-150-180">0 / 30 / 60 / 90 / 120 / 150 / 180</option>
+        <option value="0-30-60-90-120-150-180-210">0 / 30 / 60 / 90 / 120 / 150 / 180 / 210</option>
+        <option value="0-30-60-90-120-150-180-210-240">0 / 30 / 60 / 90 / 120 / 150 / 180 / 210 / 240</option>
+        <option value="0-30-60-90-120-150-180-210-240-270">0 / 30 / 60 / 90 / 120 / 150 / 180 / 210 / 240 / 270</option>
+        <option value="0-30-60-90-120-150-180-210-240-270-300">0 / 30 / 60 / 90 / 120 / 150 / 180 / 210 / 240 / 270 / 300</option>
+        <option value="0-30-60-90-120-150-180-210-240-270-300-330">0 / 30 / 60 / 90 / 120 / 150 / 180 / 210 / 240 / 270 / 300 / 330</option>
+        <option value="0-30-60-90-120-150-180-210-240-270-300-330-360">0 / 30 / 60 / 90 / 120 / 150 / 180 / 210 / 240 / 270 / 300 / 330 / 360</option>
+      </select>
+    </div>
+    <div id="fp-preview" style="display:none;margin-top:10px;background:var(--bll);border-radius:var(--rads);padding:10px 14px;font-size:13px;color:var(--bl);font-weight:700;letter-spacing:.02em"></div>
+  </div>
+
+  <div class="card">
+    <div class="ctit">&#128197; Disponibilidad del producto</div>
+    <div class="fld">
+      <label>Plazo estimado</label>
+      <select id="disponibilidad" onchange="onDisponibilidad()">
+        <option value="">&#8212; Seleccion&#225; &#8212;</option>
+        <option value="disponible">&#10003; Disponible</option>
+        <option value="10dias">10 d&#237;as</option>
+        <option value="15-20dias">15 a 20 d&#237;as</option>
+        <option value="21-30dias">21 a 30 d&#237;as</option>
+        <option value="35dias">35 d&#237;as</option>
+        <option value="40dias">40 d&#237;as</option>
+        <option value="45dias">45 d&#237;as</option>
+        <option value="60dias">60 d&#237;as</option>
+        <option value="75dias">75 d&#237;as</option>
+        <option value="90dias">90 d&#237;as</option>
+        <option value="mas100dias">+100 d&#237;as</option>
+      </select>
+    </div>
+    <div id="disp-preview" style="display:none;margin-top:10px;border-radius:var(--rads);padding:10px 14px;font-size:13px;font-weight:700"></div>
+  </div>
+
+  <div class="acts">
+    <button class="ba bwsp" onclick="genPNG()"><span class="ico">&#128172;</span>WhatsApp</button>
+    <button class="ba bmail" onclick="doMail()"><span class="ico">&#9993;&#65039;</span>Email</button>
+    <button class="ba bpdf" onclick="genPDF()"><span class="ico">&#128424;&#65039;</span>Imprimir</button>
+  </div>
+  <div style="margin-top:10px">
+    <button class="ba breset" style="width:100%;flex-direction:row;justify-content:center;gap:8px" onclick="doReset()">&#8635; Nueva cotizaci&#243;n</button>
+  </div>
+
+</div>
+
+<div id="ov">
+  <div id="ovbox">
+    <p id="ov-msg">Previsualizaci&#243;n de la cotizaci&#243;n</p>
+    <img id="pvw" alt="preview">
+    <button class="bdl" id="btn-share" onclick="doShare()">&#128172; Compartir por WhatsApp</button>
+    <button class="bdl" style="background:var(--bl);margin-top:0" onclick="doDL()">&#11015; Descargar imagen</button>
+    <button class="bcov" onclick="closeOv()">Cerrar</button>
+  </div>
+</div>
+
+<script>
+var LOGO_URL="https://raw.githubusercontent.com/implementoslecarsrl/Cotizador-lecarv2/refs/heads/main/logo.jpg";
+document.getElementById("logo").src=LOGO_URL;
+
+var VND={
+  Matias:{n:"Mat\u00edas Gonz\u00e1lez",t:"3471-576100"},
+  Lucas:{n:"Lucas Di Perna",t:"3471-521473"},
+  Nicolas:{n:"Nicol\u00e1s Errasti",t:"3471-602968"}
+};
+
+function gVN(){var s=document.getElementById("vendedor").value;return s&&VND[s]?VND[s].n:"\u2014";}
+function gVT(){var s=document.getElementById("vendedor").value;return s&&VND[s]?VND[s].t:"03471-490341";}
+
+var PREFIJOS={Matias:"MAT",Lucas:"LUC",Nicolas:"NIC"};
+
+function getDeviceId(){
+  var k="lecar_device_id";
+  var id=localStorage.getItem(k);
+  if(!id){id="d"+Math.random().toString(36).substr(2,6);localStorage.setItem(k,id);}
+  return id;
+}
+function getCotKey(v){return "lecar_cot_"+v+"_"+getDeviceId();}
+
+function getNextNum(v){
+  var key=getCotKey(v);
+  var n=parseInt(localStorage.getItem(key)||"0",10);
+  return n+1;
+}
+
+function saveNum(v,n){
+  localStorage.setItem(getCotKey(v),n);
+}
+
+function fmtCot(v,n){
+  var p=PREFIJOS[v]||"COT";
+  return p+"-"+String(n).padStart(7,"0");
+}
+
+function onVendedor(){
+  var v=document.getElementById("vendedor").value;
+  if(v){
+    var n=getNextNum(v);
+    document.getElementById("nrocot").value=fmtCot(v,n);
+    document.getElementById("nrocot").setAttribute("data-pending",n);
+  } else {
+    document.getElementById("nrocot").value="";
+  }
+  calc();
+}
+
+var DB=[
+  {cat:"Tolva S&F",vars:[
+    {n:"8 TT",p:19811000,specs:["Sin fin 160mm / 5m","Tape r\u00e1pido","Llantas 825x22.5","Divisorio central","Epoxi interior"],
+     opc:[{n:"Desc. cobertor",p:-903000},{n:"Dif. duales 825x22.5",p:1483500},]},
+    {n:"10 TT (13 M3)",p:21367000,specs:["Sin fin 160mm / 5m","Tape r\u00e1pido","Llantas 825x22.5","Divisorio central","Epoxi interior","13 M3"],
+     opc:[{n:"Desc. cobertor",p:-903000},{n:"Dif. duales 825x22.5",p:1483500}]},
+    {n:"14 TT (18 M3)",p:24916000,specs:["Sin fin 160mm / 5m","Tape r\u00e1pido","Llantas 825x22.5","Divisorio central","Epoxi interior","Palanquilla 3 pulgadas","18 M3"],
+     opc:[{n:"Desc. cobertor",p:-1023000},{n:"Dif. duales 825x22.5",p:1483500}]},
+    {n:"14 TT L\u00ednea 2023",p:28000500,specs:["Sin fin 160mm / 5m","Tape r\u00e1pido","Llantas 825x22.5","Divisorio central","Epoxi interior","Eje palanquilla 3 pulgadas - maza 5 agujeros","L\u00ednea 2023"],
+     opc:[]},
+    {n:"20 TT (25 M3)",p:34837000,specs:["Sin fin 200mm / 6m","Tape r\u00e1pido","Llantas 825x22.5 Dual","Divisorio central","Epoxi interior","Eje tubular 5 1/4 pulgadas","Maza 10 agujeros","25 M3"],
+     opc:[{n:"Desc. cobertor",p:-1234000},]},
+    {n:"24 TT (30 M3)",p:37275000,specs:["Sin fin 200mm / 6m","Tape r\u00e1pido","Llantas 825x22.5 Dual","Divisorio central","Epoxi interior","Eje tubular 5 1/4 pulgadas","Maza 10 agujeros","30 M3"],
+     opc:[{n:"Desc. cobertor",p:-1297000},]}
+  ]},
+  {cat:"Tolva Cerealera",vars:[
+    {n:"6 TT (8 M3)",p:11400500,specs:["Con lona para atar","Llantas 825x22.5","8 M3"],opc:[{n:"Desc. cobertor",p:-900500}]},
+    {n:"8 TT (10 M3)",p:13857500,specs:["Tape r\u00e1pido","Llantas 825x22.5","10 M3"],opc:[{n:"Desc. cobertor",p:-900500}]},
+    {n:"10 TT",p:16524500,specs:["Tape r\u00e1pido","Llantas 825x22.5"],opc:[{n:"Desc. cobertor",p:-900500}]},
+    {n:"14 TT (18 M3)",p:20254000,specs:["Tape r\u00e1pido","Llantas 825x22.5","18 M3"],opc:[{n:"Desc. cobertor",p:-1023000}]},
+    {n:"20 TT (25 M3)",p:30408000,specs:["Tape r\u00e1pido","Llantas 825x22.5 Dual","Eje tubular 5 1/4 pulgadas","Maza 10 agujeros","25 M3"],opc:[]},
+    {n:"24 TT",p:33900500,specs:["Tape r\u00e1pido","Llantas 825x22.5 Dual","Eje tubular 5 1/4 pulgadas","Maza 10 agujeros"],opc:[]}
+  ]},
+  {cat:"Elevador de Rollos",vars:[
+    {n:"Fijo 3.70 mts",p:6198150,specs:["Altura 3.70 mts","Fijo sin cabeceo"],opc:[]},
+    {n:"Con Cilindro Cabeceo",p:7000000,specs:["Altura 3.70 mts","Cilindro hidr\u00e1ulico de cabeceo"],opc:[]}
+  ]},
+  {cat:"Transportador Rollos",vars:[
+    {n:"Pinche 2 rollos",p:5335500,specs:["Capacidad 2 rollos"],opc:[]},
+    {n:"6 a 8 rollos",p:9175000,specs:["Capacidad 6 a 8 rollos"],opc:[]},
+    {n:"8 a 12 rollos",p:11973000,specs:["Capacidad 8 a 12 rollos"],opc:[]}
+  ]},
+  {cat:"Pala de Arrastre",vars:[
+    {n:"1.50 mts",p:5090000,specs:["Ancho 1.50 mts","Incluye reja lateral","Eje 2 pulgadas","Rodado 650x16"],opc:[{n:"Cilindro con manguera",p:799150}]},
+    {n:"2.00 mts",p:6400000,specs:["Ancho 2.00 mts","Incluye reja lateral","Eje 2 pulgadas","Rodado 750x16","Cilindro 3x200 incluido"],opc:[]}
+  ]},
+  {cat:"Tanque Combinado",vars:[
+    {n:"2000 lts",p:10300000,specs:["2000 lts","Ejes 2 pulgadas - llantas 650x16 Dual","Doble baulera + ba\u00fal trasero","Tanque agua 750 lts delantero","Chapa 1/8 - Chasis 1/4 y 3/16"],opc:[]},
+    {n:"3000 lts",p:12962500,specs:["3000 lts","Ejes 2 1/2 pulgadas - llantas 650x16 Dual","Doble baulera + ba\u00fal trasero","Tanque agua 750 lts delantero"],opc:[]},
+    {n:"4000 lts",p:14935000,specs:["4000 lts","Ejes 2 1/2 pulgadas - llantas 650x16 Dual","Doble baulera + ba\u00fal trasero","Tanque agua 750 lts delantero"],opc:[]},
+    {n:"5000 lts",p:16044000,specs:["5000 lts","Ejes 2 1/2 pulgadas maza grande - llantas 650x16 Dual","Doble baulera + ba\u00fal trasero","Tanque agua 750 lts delantero"],opc:[]},
+    {n:"6000 lts",p:17177500,specs:["6000 lts","Ejes 2 1/2 pulgadas maza grande - llantas 650x16 Dual","Doble baulera + ba\u00fal trasero","Tanque agua 750 lts delantero"],opc:[]}
+  ]},
+  {cat:"Tanque Taller",vars:[
+    {n:"2000 lts",p:12400000,specs:["2000 lts","Ejes 2 pulgadas - llantas 650x16 Dual","Taller trasero 1.50x1.50x1.30 mts","Tanque agua 700 lts arriba"],opc:[]},
+    {n:"3000 lts",p:15912500,specs:["3000 lts","Ejes 2 1/2 pulgadas - llantas 650x16 Dual","Taller trasero 1.50x1.50x1.30 mts","Tanque agua 700 lts arriba"],opc:[]},
+    {n:"4000 lts",p:17785000,specs:["4000 lts","Ejes 2 1/2 pulgadas - llantas 650x16 Dual","Taller trasero 1.50x1.50x1.30 mts","Tanque agua 700 lts arriba"],opc:[]},
+    {n:"5000 lts",p:19920000,specs:["5000 lts","Ejes 2 1/2 pulgadas maza grande - llantas 650x16 Dual","Taller trasero 1.50x1.50x1.30 mts","Tanque agua 700 lts arriba"],opc:[]}
+  ]},
+  {cat:"Combustible c/ Baulera",vars:[
+    {n:"2000 lts",p:8040000,specs:["2000 lts","Llantas 650x16","Eje palanquilla 2 pulgadas","Largo 3.25 mts"],opc:[{n:"Dif. duales",p:610800}]},
+    {n:"3000 lts",p:9860000,specs:["3000 lts","Llantas 650x16","Eje palanquilla 2 pulgadas","Largo 3.85 mts"],opc:[{n:"Dif. duales",p:610800}]},
+    {n:"4000 lts",p:12820500,specs:["4000 lts","Llantas 650x16 Duales","Eje palanquilla 2 1/2 pulgadas","Largo 3.85 mts"],opc:[]},
+    {n:"5000 lts",p:13800000,specs:["5000 lts","Llantas 650x16 Duales","Eje palanquilla 2 1/2 pulgadas","Largo 4.85 mts"],opc:[]},
+    {n:"6000 lts",p:14805000,specs:["6000 lts","Llantas 650x16 Duales","Eje palanquilla 2 1/2 pulgadas","Largo 5 mts"],opc:[]}
+  ]},
+  {cat:"Combustible s/ Baulera",vars:[
+    {n:"1500 lts",p:3990000,specs:["1500 lts","Llantas 650x16","Eje palanquilla 2 pulgadas"],opc:[]},
+    {n:"2000 lts",p:6950000,specs:["2000 lts","Llantas 650x16","Eje palanquilla 2 pulgadas","Largo 2.50 mts"],opc:[{n:"Dif. duales",p:610800}]},
+    {n:"3000 lts",p:7200000,specs:["3000 lts","Llantas 650x16","Eje palanquilla 2 pulgadas","Largo 3 mts"],opc:[{n:"Dif. duales",p:610800}]},
+    {n:"4000 lts",p:8900500,specs:["4000 lts","Llantas 650x16","Eje palanquilla 2 pulgadas","Largo 3 mts"],opc:[{n:"Dif. duales",p:610800}]},
+    {n:"5000 lts",p:11720000,specs:["5000 lts","Llantas 650x16 Duales","Eje palanquilla 2 1/2 pulgadas","Largo 4 mts"],opc:[]},
+    {n:"6000 lts",p:13205000,specs:["6000 lts","Llantas 650x16 Duales","Eje palanquilla 2 1/2 pulgadas","Largo 4.20 mts"],opc:[]},
+    {n:"8000 lts",p:16760000,specs:["8000 lts","Llantas 8.25x22.5","Eje palanquilla 3 pulgadas","Largo 5 mts"],opc:[{n:"Dif. duales",p:1483500}]},
+    {n:"10000 lts",p:17605000,specs:["10000 lts","Llantas 8.25x22.5","Eje palanquilla 3 pulgadas","Largo 5.50 mts"],opc:[{n:"Dif. duales",p:1483500}]}
+  ]},
+  {cat:"Tanque Pl\u00e1stico",vars:[
+    {n:"Combinado 3750 lts",p:10820000,specs:["3750 lts","Llantas duales 750x16","Baulera trasera + 2 cajones laterales","Tanque agua 750 lts delantero","Largo total 4.85 mts"],opc:[]},
+    {n:"3750 lts c/ Bidonera",p:10451000,specs:["3750 lts","Llantas 750x16","Eje palanquilla 2 pulgadas","Bidoneras laterales y frontales","Largo 4.0 mts - Tanque: 2.90x1.49x1.21 mts"],opc:[{n:"Dif. duales",p:610800}]},
+    {n:"5000 lts c/ Bidonera",p:13695000,specs:["5000 lts","Llantas Duales 750x16","Eje 2 1/2 pulgadas - masas rodillos 9-11","Bidoneras laterales y frontales","Largo 4.2 mts"],opc:[]},
+    {n:"6000 lts c/ Bidonera",p:17445000,specs:["6000 lts","Llantas Duales 750x16","Eje 2 1/2 pulgadas","Bidoneras laterales y frontales","Largo 4.60 mts - Tanque: 2.90x1.49x2.00 mts"],opc:[]},
+    {n:"8000 lts c/ Bidonera",p:20483800,specs:["8000 lts","Llantas 22.5 - masas rodillos 9-12","Eje 3 pulgadas","Bidoneras laterales y frontales","Largo 4.2 mts - Tanque: 5.06x1.45x2.10 mts"],opc:[{n:"Dif. duales",p:1483500}]},
+    {n:"10500 lts s/ Bidonera",p:24625000,specs:["10500 lts","Llantas 22.5 - masas rodillos 10-13","Eje 3 pulgadas","Largo 4.2 mts - Tanque: 5.06x1.45x2.10 mts"],opc:[{n:"Dif. duales",p:1483500}]}
+  ]},
+  {cat:"Playo con Barandas",vars:[
+    {n:"3 TT",p:6520000,specs:["Largo 3 mts x Ancho 1.90 mts","Llantas 650x16","Aro giratorio a bolillas","Piso chapa antideslizante","Barandas laterales 0.50 mts"],opc:[{n:"Dif. duales",p:610800}]},
+    {n:"4 TT",p:7655000,specs:["Largo 4 mts x Ancho 1.90 mts","Llantas 650x16","Aro giratorio a bolillas","Piso chapa antideslizante","Barandas laterales 0.50 mts"],opc:[{n:"Dif. duales",p:610800}]},
+    {n:"6 TT",p:12143000,specs:["Largo 4.50 mts x Ancho 2.20 mts","Llantas 650x16 Duales - centro 150","Ejes 2 1/2 pulgadas","Piso chapa antideslizante","Barandas laterales 0.70 mts"],opc:[]}
+  ]},
+  {cat:"Volcador Hidr\u00e1ulico",vars:[
+    {n:"4 TT",p:14270000,specs:["Largo 4 mts x Ancho 1.90 mts","Aro giratorio a bolillas","Baranda trasera volcable","Barandas laterales 0.50 mts","Cilindro hidr\u00e1ulico trasero"],opc:[{n:"Dif. llantas Duales",p:610800}]},
+    {n:"6 TT",p:16464000,specs:["Largo 4.20 mts x Ancho 2.00 mts","Llantas 650x16 Duales","Aro giratorio a bolillas","Baranda trasera volcable","Barandas laterales 0.60 mts"],opc:[]}
+  ]},
+  {cat:"Acoplado Taller",vars:[
+    {n:"Chico",p:13010000,specs:["Largo 4 x Ancho 2.00 x Alto 1.90 mts","4 puertas laterales + 1 trasera","Llantas 650x16"],opc:[{n:"Dif. duales",p:610800}]},
+    {n:"Grande",p:15300000,specs:["Largo 5 x Ancho 2.10 x Alto 1.90 mts","4 puertas laterales + 1 trasera","Llantas Duales 650x16"],opc:[]}
+  ]},
+  {cat:"Jaula para Cerdos",vars:[
+    {n:"6 mts de largo",p:16800000,specs:["Largo 6.00 x Ancho 2.00 x Alto 1.30 mts","8 llantas 650x16 Dual","Aro giratorio a bolillas","Puerta trasera guillotina","Con rampa para carga"],opc:[]}
+  ]},
+  {cat:"Vaquero",vars:[
+    {n:"3-4 animales - Cuello Cig\u00fcena",p:12900000,specs:["Largo 3.50 x Ancho 2.00 x Alto 2.00 mts","4 llantas 750x16 simple","Con balanc\u00edn - lanza con registro","Enganche cuello cig\u00fcena","Homologable SENASA"],opc:[{n:"Rampa y cargador",p:-1040600},{n:"Registro de lanza",p:-441500}]},
+    {n:"5-6 animales - Cuello Cig\u00fcena",p:14290000,specs:["Largo 4.50 x Ancho 2.00 x Alto 2.00 mts","4 llantas 750x16 simple","Con balanc\u00edn - lanza con registro - divisorio","Enganche cuello cig\u00fcena","Homologable SENASA"],opc:[{n:"Rampa y cargador",p:-1040600},{n:"Registro de lanza",p:-441500}]},
+    {n:"3-4 animales - Convencional",p:11024000,specs:["Largo 3.50 x Ancho 2.00 x Alto 2.00 mts","4 llantas 750x16 simple","Con balanc\u00edn - lanza con registro","Enganche convencional","Homologable SENASA"],opc:[{n:"Rampa y cargador",p:-1040600},{n:"Registro de lanza",p:-441500}]},
+    {n:"5-6 animales - Convencional",p:11930000,specs:["Largo 4.50 x Ancho 2.00 x Alto 2.00 mts","4 llantas 750x16 simple","Con balanc\u00edn - lanza con registro - divisorio","Enganche convencional","Homologable SENASA"],opc:[{n:"Rampa y cargador",p:-1040600},{n:"Registro de lanza",p:-441500}]}
+  ]},
+  {cat:"Acoplado para Drone Agr\u00edcola",vars:[
+    {n:"Acoplado Drone Agr\u00edcola",p:11275000,specs:["Llantas 750x16","Ejes 2\" con balanc\u00edn","2 tanques de pl\u00e1stico de 750 lts c/u","Taller cerrado para guardar drone","Escalera frontal para subir a base de piloto","Playo de 2 x 3 mts"],opc:[]}
+  ]},
+  {cat:"⚙️ Producto personalizado",vars:[{n:"Personalizado",p:0,specs:[],opc:[]}]}
+]
+
+var ACCS=[
+  {n:"Guardabarros",p:500000},
+  {n:"Noria 5 mts",p:5309000},
+  {n:"Chimango de 200",p:1266000},
+    {n:"Puerta baulera",p:65000}
+];
+
+var tipo="lista", iva="sin", pngUrl=null;
+var espItems=[];
+var occItems=[];
+var QTY={llanta:0, baul:0, baul155:0, lucesVolc:0, lucesTolva:0};
+var QTY_PRICE={llanta:55000, baul:433500, baul155:251050, lucesVolc:261250, lucesTolva:310000};
+
+function toggleMod(){
+  var b=document.getElementById("mod-body");
+  var a=document.getElementById("mod-arrow");
+  if(b.style.display==="none"){
+    b.style.display="block";
+    a.style.transform="rotate(180deg)";
+  } else {
+    b.style.display="none";
+    a.style.transform="";
+  }
+}
+
+function toggleLuces(key){
+  QTY[key] = QTY[key]>0 ? 0 : 1;
+  var btn=document.getElementById("btn-"+key);
+  if(btn){
+    if(QTY[key]>0){ btn.classList.add("on"); }
+    else { btn.classList.remove("on"); }
+  }
+  var tot=QTY[key]*QTY_PRICE[key];
+  var lel=document.getElementById("luces-tot");
+  var lucTot=(QTY.lucesVolc*QTY_PRICE.lucesVolc)+(QTY.lucesTolva*QTY_PRICE.lucesTolva);
+  if(lel) lel.textContent=lucTot>0?fmt(lucTot):"";
+  calc();
+}
+
+function adjQty(key, delta){
+  QTY[key]=Math.max(0, QTY[key]+delta);
+  // qty display (only for numeric selectors)
+  var qel=document.getElementById(key+"-qty");
+  if(qel) qel.textContent=QTY[key];
+  // total display
+  var tot=QTY[key]*QTY_PRICE[key];
+  var tel=document.getElementById(key+"-tot");
+  if(tel) tel.textContent=QTY[key]>0?fmt(tot):"";
+  // luces combined total
+  var lucTot=(QTY.lucesVolc*QTY_PRICE.lucesVolc)+(QTY.lucesTolva*QTY_PRICE.lucesTolva);
+  var lel=document.getElementById("luces-tot");
+  if(lel) lel.textContent=lucTot>0?fmt(lucTot):"";
+  // toggle button styles for luces — use class
+  ["lucesVolc","lucesTolva"].forEach(function(k){
+    var btn=document.getElementById("btn-"+k);
+    if(btn){
+      if(QTY[k]>0){
+        btn.classList.add("on");
+      } else {
+        btn.classList.remove("on");
+        var tel=document.getElementById(k+"-tot");
+        if(tel) tel.textContent="";
+      }
+    }
+  });
+  calc();
+}
+
+function resetQty(){
+  Object.keys(QTY).forEach(function(k){
+    QTY[k]=0;
+    var qel=document.getElementById(k+"-qty");
+    var tel=document.getElementById(k+"-tot");
+    if(qel) qel.textContent="0";
+    if(tel) tel.textContent="";
+  });
+  var lel=document.getElementById("luces-tot");
+  if(lel) lel.textContent="";
+  ["lucesVolc","lucesTolva"].forEach(function(k){
+    var btn=document.getElementById("btn-"+k);
+    if(btn) btn.classList.remove("on");
+  });
+}
+var catSel=document.getElementById("cat");
+var varSel=document.getElementById("var");
+
+(function(){
+  var d=new Date();
+  var dd=String(d.getDate()).padStart(2,"0");
+  var mm=String(d.getMonth()+1).padStart(2,"0");
+  var yyyy=d.getFullYear();
+  document.getElementById("fecha").value=dd+"-"+mm+"-"+yyyy;
+})();
+
+function fmt(v){return "$ "+Math.round(v).toLocaleString("es-AR");}
+
+DB.forEach(function(d){
+  var o=document.createElement("option");
+  o.value=d.cat; o.textContent=d.cat;
+  catSel.appendChild(o);
+});
+
+function addEsp(){
+  var desc=document.getElementById("esp-desc").value.trim();
+  var precio=parseFloat(document.getElementById("esp-precio").value);
+  if(!desc){alert("Escribi una descripci\u00f3n.");return;}
+  if(!precio||precio<=0){alert("Ingres\u00e1 un precio v\u00e1lido.");return;}
+  espItems.push({desc:desc,p:precio});
+  document.getElementById("esp-desc").value="";
+  document.getElementById("esp-precio").value="";
+  renderEsp();
+  calc();
+}
+
+function delEsp(i){
+  espItems.splice(i,1);
+  renderEsp();
+  calc();
+}
+
+function renderEsp(){
+  var el=document.getElementById("esp-list");
+  if(!espItems.length){el.innerHTML="";return;}
+  el.innerHTML=espItems.map(function(e,i){
+    return '<div class="esp-item">'
+      +'<span class="esp-desc">'+e.desc+'</span>'
+      +'<span class="esp-price">+ '+fmt(e.p)+'</span>'
+      +'<button class="esp-del" onclick="delEsp('+i+')" title="Eliminar">&#10005;</button>'
+      +'</div>';
+  }).join("");
+}
+
+function updateCustom(){
+  var nombre=document.getElementById("custom-nombre").value.trim();
+  var precio=parseFloat(document.getElementById("custom-precio").value)||0;
+  var desc=document.getElementById("custom-desc").value.trim();
+  // Update the DB entry dynamically
+  var d=DB.find(function(x){return x.cat.indexOf("Producto personalizado")>-1;});
+  if(d){
+    d.vars[0].n=nombre||"Producto personalizado";
+    d.vars[0].p=precio;
+    // Update varSel display
+        if(varSel.options[0]) varSel.options[0].text=nombre||"Producto personalizado";
+  }
+  // Show preview
+  var prev=document.getElementById("custom-preview");
+  if(precio>0){
+    prev.style.display="block";
+    prev.innerHTML="<strong>"+(nombre||"Producto")+"</strong>"+(desc?"<br><span style='color:var(--gy3);font-size:12px'>"+desc.replace(/\n/g,"<br>")+"</span>":"")+"<br><strong style='color:var(--bl);font-size:16px'>Precio base: "+fmt(precio)+"</strong>";
+  } else {
+    prev.style.display="none";
+  }
+  calc();
+}
+
+function addOcc(){
+  var desc=document.getElementById("occ-desc").value.trim();
+  var precio=parseFloat(document.getElementById("occ-precio").value);
+  if(!desc){alert("Escribí una descripción interna.");return;}
+  if(!precio||precio<=0){alert("Ingresá un monto válido.");return;}
+  occItems.push({desc:desc,p:precio});
+  document.getElementById("occ-desc").value="";
+  document.getElementById("occ-precio").value="";
+  renderOcc();
+  calc();
+}
+
+function delOcc(i){
+  occItems.splice(i,1);
+  renderOcc();
+  calc();
+}
+
+function renderOcc(){
+  var el=document.getElementById("occ-list");
+  if(!occItems.length){el.innerHTML="";return;}
+  el.innerHTML=occItems.map(function(e,i){
+    return '<div class="esp-item">'
+      +'<span class="esp-desc">'+e.desc+' <span style="font-size:11px;color:var(--gy3)">(interno)</span></span>'
+      +'<span class="esp-price" style="color:var(--gy4)">+ '+fmt(e.p)+'</span>'
+      +'<button class="esp-del" onclick="delOcc('+i+')" title="Eliminar">&#10005;</button>'
+      +'</div>';
+  }).join("");
+}
+
+
+
+
+
+function adjLlanta(delta){
+  llantaQty=Math.max(0, llantaQty+delta);
+  document.getElementById("llanta-qty").textContent=llantaQty;
+  var tot=llantaQty*55000;
+  document.getElementById("llanta-total").textContent=llantaQty>0?fmt(tot):"";
+  calc();
+}
+
+function onCat(){
+  var d=DB.find(function(x){return x.cat===catSel.value;});
+  varSel.innerHTML="";
+  d.vars.forEach(function(v,i){
+    var o=document.createElement("option");
+    o.value=i; o.textContent=v.n;
+    varSel.appendChild(o);
+  });
+  onVar();
+}
+
+function onVar(){
+  var d=DB.find(function(x){return x.cat===catSel.value;});
+  var v=d.vars[+varSel.value];
+  var isCustom=catSel.value.indexOf("Producto personalizado")>-1;
+
+  // Show/hide custom card
+  document.getElementById("custom-card").style.display=isCustom?"block":"none";
+  if(isCustom){
+    document.getElementById("specs-card").style.display="none";
+    document.getElementById("opc-card").style.display="none";
+    calc();
+    return;
+  }
+
+  var sc=document.getElementById("specs-card");
+  var sl=document.getElementById("specs-list");
+  if(v.specs && v.specs.length){
+    sc.style.display="block";
+    sl.innerHTML=v.specs.map(function(s){
+      return '<div class="spec-row"><span class="spec-dot"></span>'+s+'</div>';
+    }).join("");
+  } else {
+    sc.style.display="none";
+  }
+
+  var oc=document.getElementById("opc-card");
+  var op=document.getElementById("opc-pills");
+  if(v.opc && v.opc.length){
+    oc.style.display="block";
+    op.innerHTML=v.opc.map(function(o,i){return mkPill("opc"+i,o);}).join("");
+  } else {
+    oc.style.display="none";
+  }
+
+  document.getElementById("acc-pills").innerHTML=ACCS.map(function(a,i){return mkPill("acc"+i,a);}).join("");
+  calc();
+}
+
+function mkPill(id,o){
+  var neg=o.p<0;
+  var pr=neg?"- "+fmt(Math.abs(o.p)):"+ "+fmt(o.p);
+  return '<button class="pill" id="'+id+'" onclick="tgPill(this)" data-p="'+o.p+'" data-n="'+o.n.replace(/"/g,"&quot;")+'">'
+    +'<span class="ck"></span>'+o.n+' <span class="pp">'+pr+'</span></button>';
+}
+
+function tgPill(el){
+  var p=+el.getAttribute("data-p");
+  if(el.classList.contains("on")||el.classList.contains("on-neg")){
+    el.classList.remove("on","on-neg");
+  } else {
+    el.classList.add(p<0?"on-neg":"on");
+  }
+
+  calc();
+}
+
+function selT(btn){
+  document.querySelectorAll(".bopt").forEach(function(b){b.classList.remove("on");});
+  btn.classList.add("on"); tipo=btn.getAttribute("data-v"); calc();
+}
+
+function selI(btn){
+  document.querySelectorAll(".biva").forEach(function(b){b.classList.remove("on");});
+  btn.classList.add("on"); iva=btn.getAttribute("data-v"); calc();
+}
+
+function getOpcs(){
+  var tot=0,labs=[];
+  document.querySelectorAll(".pill.on,.pill.on-neg").forEach(function(el){
+    var p=+el.getAttribute("data-p");
+    var nm=el.getAttribute("data-n")||el.textContent.replace(/[+\-$0-9.,\s]/g,"").trim();
+    tot+=p;
+    labs.push({n:nm,p:p});
+  });
+  return {tot:tot,labs:labs};
+}
+
+function calc(){
+  var d=DB.find(function(x){return x.cat===catSel.value;});
+  if(!d) return;
+  var v=d.vars[+varSel.value];
+  if(!v) return;
+  var op=getOpcs();
+  var espTot=espItems.reduce(function(a,e){return a+e.p;},0);
+  var occTot=occItems.reduce(function(a,e){return a+e.p;},0);
+  var qtyTot=Object.keys(QTY).reduce(function(a,k){return a+QTY[k]*QTY_PRICE[k];},0);
+  var base=v.p+occTot, sub=base+op.tot+espTot+qtyTot;
+  var d1=0,d2=0;
+  if(tipo==="conc") d1=sub*.15;
+  else if(tipo==="contado") d1=sub*.10;
+  else if(tipo==="cc"){d1=sub*.15; d2=(sub-d1)*.10;}
+  var neto=sub-d1-d2, ivaV=0, fin=neto;
+  if(iva==="mas"){ivaV=neto*.105; fin=neto+ivaV;}
+  var ivaTag=iva==="mas"?"c/ IVA 10.5%":"sin IVA";
+
+  var QTY_LABELS={llanta:"Dif. llanta 17",baul:"Ba\u00fal lateral",baul155:"Ba\u00fal lateral 1.55m",lucesVolc:"Dif. luces volcador",lucesTolva:"Dif. luces tolva grande"};
+  var rows=[];
+  var isCustom2=catSel.value.indexOf("Producto personalizado")>-1;
+  var baseLabel=isCustom2?(document.getElementById("custom-nombre").value.trim()||"Producto personalizado"):"Precio base - "+v.n;
+  rows.push({l:baseLabel,v:fmt(v.p),c:"base"});
+  // Custom description in specs
+  if(isCustom2){
+    var cdesc=document.getElementById("custom-desc").value.trim();
+    if(cdesc) cdesc.split("\n").forEach(function(line){if(line.trim()) rows.push({l:line.trim(),v:"",c:"spec"});});
+  }
+  // Items especiales con descripcion
+  espItems.forEach(function(e){rows.push({l:e.desc,v:"+ "+fmt(e.p),c:"pos"});});
+  // Opcionales del producto
+  op.labs.forEach(function(o){rows.push({l:o.n,v:(o.p<0?"- ":"+ ")+fmt(Math.abs(o.p)),c:o.p<0?"neg":"pos"});});
+  // Modificadores con cantidad y precio
+  Object.keys(QTY).forEach(function(k){
+    if(QTY[k]>0){
+      var label=QTY_LABELS[k]||(k);
+      var tot=QTY[k]*QTY_PRICE[k];
+      var qty=QTY[k]>1?" x"+QTY[k]:"";
+      rows.push({l:label+qty,v:"+ "+fmt(tot),c:"pos"});
+    }
+  });
+  if(op.tot!==0||espTot!==0||qtyTot!==0) rows.push({l:"Subtotal con opcionales",v:fmt(sub),c:"base"});
+  if(d1>0) rows.push({l:tipo==="conc"||tipo==="cc"?"Desc. concesionario (15%)":"Desc. contado (10%)",v:"- "+fmt(d1),c:"neg"});
+  if(d2>0) rows.push({l:"Desc. contado (10%)",v:"- "+fmt(d2),c:"neg"});
+  if(iva==="mas") rows.push({l:"IVA (+10.5%)",v:"+ "+fmt(ivaV),c:"pos"});
+
+  document.getElementById("desglose").innerHTML=
+    rows.map(function(r){return '<div class="drow"><span class="dl">'+r.l+'</span><span class="dv '+r.c+'">'+r.v+'</span></div>';}).join("")+
+    '<div class="tbox"><div><div class="tl">PRECIO</div><div class="tv">'+fmt(fin)+'</div><div class="tb">'+ivaTag+'</div></div></div>';
+
+  window._lc={v:v,base:base,sub:sub,tot:op.tot,labs:op.labs,espTot:espTot,occTot:occTot,qtyTot:qtyTot,d1:d1,d2:d2,ivaV:ivaV,fin:fin,ivaTag:ivaTag,cat:catSel.value};
+}
+
+function saveToSheets(extra){
+  var c=window._lc;
+  if(!c) return;
+  var payload={
+    data:[{
+      Fecha: "'" + (document.getElementById("fecha").value||""),
+      NroCot: document.getElementById("nrocot").value||"",
+      Vendedor: gVN(),
+      Cliente: document.getElementById("cliente").value||"",
+      Categoria: c.cat||"",
+      Variante: c.v.n||"",
+      PrecioBase: Math.round(c.base),
+      Opcionales: c.labs.map(function(o){return o.n+(o.p<0?" -":" +")+Math.round(Math.abs(o.p));}).join(" | ")||"-",
+      Especiales: espItems.map(function(e){return e.desc+": +"+Math.round(e.p);}).join(" | ")||"-",
+      Modificadores: Object.keys(QTY).filter(function(k){return QTY[k]>0;}).map(function(k){return k+" x"+QTY[k]+" = "+fmt(QTY[k]*QTY_PRICE[k]);}).join(" | ")||"-",
+      Descuento: Math.round(c.d1+c.d2),
+      IVA: iva==="mas"?"Con IVA 10.5%":"Sin IVA",
+      PrecioFinal: Math.round(c.fin),
+      OtrosCostos: Math.round(c.occTot||0),
+      OtrosDesc: occItems.map(function(e){return e.desc+": +"+Math.round(e.p);}).join(" | ")||"-",
+      FormaPago: (function(){var s=document.getElementById("forma-pago");return s&&s.value?s.options[s.selectedIndex].text:"-";})(),
+      Estado: (function(){var tel=(document.getElementById("telefono").value||"").trim();var loc=(document.getElementById("localidad").value||"").trim();var parts=[];if(tel) parts.push("Tel: '"+tel);if(loc) parts.push("Loc: "+loc);return parts.length?parts.join(" | "):"Cotizacion";})()
+    }]
+  };
+  fetch("https://sheetdb.io/api/v1/t0edzlszadw98",{
+    method:"POST",
+    headers:{"Content-Type":"application/json","Accept":"application/json"},
+    body:JSON.stringify(payload)
+  }).then(function(r){return r.json();})
+  .then(function(d){console.log("Sheets OK",d);})
+  .catch(function(e){console.log("Sheets error",e);});
+}
+
+function confirmarNum(){
+  var v=document.getElementById("vendedor").value;
+  if(v){
+    var pending=document.getElementById("nrocot").getAttribute("data-pending");
+    if(pending) saveNum(v,parseInt(pending,10));
+  }
+}
+
+function genPNG(){
+  confirmarNum();
+  saveToSheets("whatsapp");
+  var c=window._lc;
+  if(!c){alert("Complet\u00e1 la cotizaci\u00f3n primero.");return;}
+  var cliente=document.getElementById("cliente").value||"\u2014";
+  var nrocot=document.getElementById("nrocot").value||"\u2014";
+  var fecha=document.getElementById("fecha").value||"\u2014";
+  var vendedor=gVN(), tel=gVT();
+  var specs=c.v.specs||[];
+
+  var rows=[];
+  rows.push({l:"Precio base - "+c.v.n,v:fmt(c.base),cl:"#212121"});
+  c.labs.forEach(function(o){rows.push({l:o.n,v:(o.p<0?"- ":"+ ")+fmt(Math.abs(o.p)),cl:o.p<0?"#C62828":"#2E7D32"});});
+  espItems.forEach(function(e){rows.push({l:e.desc,v:"+ "+fmt(e.p),cl:"#2E7D32"});});
+  var QTY_LBL={llanta:"Dif. llanta 17",baul:"Baúl lateral",baul155:"Baúl lateral 1.55m",lucesVolc:"Dif. luces volcador",lucesTolva:"Dif. luces tolva grande"};
+  Object.keys(QTY).forEach(function(k){
+    if(QTY[k]>0){
+      var lbl=(QTY_LBL[k]||k)+(QTY[k]>1?" x"+QTY[k]:"");
+      rows.push({l:lbl,v:"+ "+fmt(QTY[k]*QTY_PRICE[k]),cl:"#2E7D32"});
+    }
+  });
+  if(c.tot!==0) rows.push({l:"Subtotal con opcionales",v:fmt(c.sub),cl:"#212121"});
+  if(c.d1>0) rows.push({l:tipo==="conc"||tipo==="cc"?"Desc. concesionario (15%)":"Desc. contado (10%)",v:"- "+fmt(c.d1),cl:"#C62828"});
+  if(c.d2>0) rows.push({l:"Desc. contado (10%)",v:"- "+fmt(c.d2),cl:"#C62828"});
+  if(iva==="mas") rows.push({l:"IVA (+10.5%)",v:"+ "+fmt(c.ivaV),cl:"#2E7D32"});
+
+  var W=520,HR=36,HH=72,HI=52,HC=30,HS=specs.length*24+(specs.length?6:0),HT=72,HF=30;
+  var H=HH+HI+HC+HS+rows.length*HR+HT+HF+8;
+  var cv=document.createElement("canvas");
+  cv.width=W*2; cv.height=H*2;
+  var ctx=cv.getContext("2d"); ctx.scale(2,2);
+  var y=0;
+
+  function rr(x,y,w,h,r){
+    ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);
+    ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);
+    ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);
+    ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);
+    ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();
+  }
+
+  var li=new Image();
+  li.onload=function(){
+    // Header
+    ctx.fillStyle="#1565C0"; ctx.fillRect(0,y,W,HH);
+    var lh=40,lw=lh*(li.width/li.height);
+    ctx.fillStyle="#fff"; rr(12,y+16,lw+10,lh,5); ctx.fill();
+    ctx.drawImage(li,17,y+21,lw,lh-10);
+    ctx.fillStyle="#fff"; ctx.font="bold 14px Arial";
+    ctx.fillText("Cotizaci\u00f3n N\u00b0 "+nrocot,lw+30,y+30);
+    ctx.font="11px Arial"; ctx.fillStyle="rgba(255,255,255,0.8)";
+    ctx.fillText(fecha,lw+30,y+48); y+=HH;
+
+    // Info
+    ctx.fillStyle="#E3F2FD"; ctx.fillRect(0,y,W,HI);
+    ctx.strokeStyle="#BBDEFB"; ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(0,y+HI);ctx.lineTo(W,y+HI);ctx.stroke();
+    ctx.fillStyle="#1565C0"; ctx.font="bold 10px Arial";
+    ctx.fillText("CLIENTE",16,y+16);
+    ctx.fillStyle="#212121"; ctx.font="13px Arial";
+    ctx.fillText(cliente,16,y+34);
+    ctx.fillStyle="#1565C0"; ctx.font="bold 10px Arial";
+    ctx.fillText("VENDEDOR",W/2+8,y+16);
+    ctx.fillStyle="#212121"; ctx.font="13px Arial";
+    ctx.fillText(vendedor,W/2+8,y+34); y+=HI;
+
+    // Cat
+    ctx.fillStyle="#f5f5f5"; ctx.fillRect(0,y,W,HC);
+    ctx.strokeStyle="#e0e0e0"; ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(0,y+HC);ctx.lineTo(W,y+HC);ctx.stroke();
+    ctx.fillStyle="#1565C0"; ctx.font="bold 11px Arial";
+    ctx.fillText((c.cat+" - "+c.v.n).toUpperCase(),16,y+19); y+=HC;
+
+    // Specs
+    specs.forEach(function(s,si){
+      ctx.fillStyle=si%2===0?"#fff":"#fafafa"; ctx.fillRect(0,y,W,24);
+      ctx.fillStyle="#1565C0"; ctx.beginPath();ctx.arc(22,y+12,3,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle="#616161"; ctx.font="12px Arial";
+      ctx.fillText(s,32,y+17); y+=24;
+    });
+    if(specs.length){ctx.fillStyle="#e0e0e0";ctx.fillRect(0,y,W,1);y+=6;}
+
+    // Rows
+    rows.forEach(function(r,i){
+      ctx.fillStyle=i%2===0?"#fff":"#fafafa"; ctx.fillRect(0,y,W,HR);
+      ctx.strokeStyle="#f0f0f0"; ctx.lineWidth=0.5;
+      ctx.beginPath();ctx.moveTo(0,y+HR);ctx.lineTo(W,y+HR);ctx.stroke();
+      ctx.fillStyle="#757575"; ctx.font="13px Arial"; ctx.fillText(r.l,16,y+23);
+      ctx.fillStyle=r.cl; ctx.font="bold 13px Arial";
+      var vw=ctx.measureText(r.v).width; ctx.fillText(r.v,W-vw-16,y+23); y+=HR;
+    });
+    y+=4;
+
+    // Total
+    ctx.fillStyle="#1565C0"; ctx.fillRect(0,y,W,HT);
+    ctx.fillStyle="rgba(255,255,255,0.85)"; ctx.font="12px Arial"; ctx.fillText("PRECIO",16,y+22);
+    ctx.fillStyle="#fff"; ctx.font="bold 26px Arial"; ctx.fillText(fmt(c.fin),16,y+52);
+    ctx.font="bold 11px Arial";
+    var bw=ctx.measureText(c.ivaTag).width+16;
+    ctx.fillStyle="rgba(255,255,255,0.2)"; rr(W-bw-14,y+22,bw,24,5); ctx.fill();
+    ctx.fillStyle="#fff"; ctx.fillText(c.ivaTag,W-bw-6,y+38); y+=HT;
+
+    // Forma de pago + Disponibilidad
+    var fpSel=document.getElementById("forma-pago");
+    var fpVal=fpSel?fpSel.options[fpSel.selectedIndex].text:"";
+    var dpSel=document.getElementById("disponibilidad");
+    var dpVal=dpSel?dpSel.options[dpSel.selectedIndex].text:"";
+    var fpDpRaw=document.getElementById("disponibilidad")?document.getElementById("disponibilidad").value:"";
+    if(fpVal&&fpVal!=="— Seleccioná —"||dpVal&&dpVal!=="— Seleccioná —"){
+      var HFP=36;
+      ctx.fillStyle="#E3F2FD"; ctx.fillRect(0,y,W,HFP);
+      ctx.fillStyle="#1565C0"; ctx.font="bold 10px Arial";
+      if(fpVal&&fpVal!=="\u2014 Selecci\u00f3n\u00e1 \u2014"){
+        ctx.fillText("FORMA DE PAGO",16,y+14);
+        ctx.fillStyle="#212121"; ctx.font="12px Arial";
+        ctx.fillText(fpVal,16,y+28);
+      }
+      if(dpVal&&dpVal!=="\u2014 Selecci\u00f3n\u00e1 \u2014"){
+        ctx.fillStyle="#1565C0"; ctx.font="bold 10px Arial";
+        ctx.fillText("DISPONIBILIDAD",W/2+8,y+14);
+        var dpColor=fpDpRaw==="disponible"?"#2E7D32":fpDpRaw==="mas100dias"?"#E65100":"#1565C0";
+        ctx.fillStyle=dpColor; ctx.font="bold 12px Arial";
+        ctx.fillText(dpVal,W/2+8,y+28);
+      }
+      y+=HFP;
+    }
+
+    // Footer
+    ctx.fillStyle="#f5f5f5"; ctx.fillRect(0,y,W,HF);
+    ctx.fillStyle="#9e9e9e"; ctx.font="10px Arial";
+    var ft="Implementos Lecar S.R.L.  -  Armstrong, Santa Fe  -  "+tel;
+    var fw=ctx.measureText(ft).width; ctx.fillText(ft,(W-fw)/2,y+19);
+
+    pngUrl=cv.toDataURL("image/png");
+    document.getElementById("pvw").src=pngUrl;
+    document.getElementById("ov").classList.add("show");
+  };
+  li.src=LOGO_URL;
+}
+
+function doDL(){
+  if(!pngUrl) return;
+  var nr=document.getElementById("nrocot").value||"cot";
+  var cl=document.getElementById("cliente").value||"cliente";
+  var a=document.createElement("a");
+  a.href=pngUrl; a.download="Cotizacion_Lecar_"+nr+"_"+cl+".png"; a.click();
+}
+
+function doShare(){
+  if(!pngUrl) return;
+  var nr=document.getElementById("nrocot").value||"cot";
+  var cl=document.getElementById("cliente").value||"cliente";
+  var filename="Cotizacion_Lecar_"+nr+"_"+cl+".png";
+  if(navigator.share && navigator.canShare){
+    fetch(pngUrl)
+      .then(function(r){return r.blob();})
+      .then(function(blob){
+        var file=new File([blob], filename, {type:"image/png"});
+        if(navigator.canShare({files:[file]})){
+          navigator.share({files:[file], title:"Cotizaci\u00f3n Lecar", text:"Cotizaci\u00f3n N\u00b0 "+nr+" - "+cl})
+            .catch(function(e){if(e.name!=="AbortError") doDL();});
+        } else {
+          doDL();
+        }
+      }).catch(function(){doDL();});
+  } else {
+    doDL();
+    document.getElementById("ov-msg").textContent="Imagen descargada. Adjuntala en WhatsApp.";
+  }
+}
+
+function genPDF(){
+  confirmarNum();
+  saveToSheets("imprimir");
+  var c=window._lc;
+  if(!c){alert("Complet\u00e1 la cotizaci\u00f3n primero.");return;}
+  var cliente=document.getElementById("cliente").value||"\u2014";
+  var nrocot=document.getElementById("nrocot").value||"\u2014";
+  var fecha=document.getElementById("fecha").value||"\u2014";
+  var vendedor=gVN(), tel=gVT();
+  var specs=c.v.specs||[];
+
+  var rows=[];
+  rows.push({l:"Precio base - "+c.v.n,v:fmt(c.base),cl:"#212121"});
+  c.labs.forEach(function(o){rows.push({l:o.n,v:(o.p<0?"- ":"+ ")+fmt(Math.abs(o.p)),cl:o.p<0?"#C62828":"#2E7D32"});});
+  espItems.forEach(function(e){rows.push({l:e.desc,v:"+ "+fmt(e.p),cl:"#2E7D32"});});
+  var QTY_LBL={llanta:"Dif. llanta 17",baul:"Ba\u00fal lateral",baul155:"Ba\u00fal lateral 1.55m",lucesVolc:"Dif. luces volcador",lucesTolva:"Dif. luces tolva grande"};
+  Object.keys(QTY).forEach(function(k){
+    if(QTY[k]>0){
+      var lbl=(QTY_LBL[k]||k)+(QTY[k]>1?" x"+QTY[k]:"");
+      rows.push({l:lbl,v:"+ "+fmt(QTY[k]*QTY_PRICE[k]),cl:"#2E7D32"});
+    }
+  });
+  if(c.tot!==0) rows.push({l:"Subtotal con opcionales",v:fmt(c.sub),cl:"#212121"});
+  if(c.d1>0) rows.push({l:tipo==="conc"||tipo==="cc"?"Desc. concesionario (15%)":"Desc. contado (10%)",v:"- "+fmt(c.d1),cl:"#C62828"});
+  if(c.d2>0) rows.push({l:"Desc. contado (10%)",v:"- "+fmt(c.d2),cl:"#C62828"});
+  if(iva==="mas") rows.push({l:"IVA (+10.5%)",v:"+ "+fmt(c.ivaV),cl:"#2E7D32"});
+
+  var W=520,HR=36,HH=72,HI=52,HC=30,HS=specs.length*24+(specs.length?6:0),HT=72,HF=30;
+  var H=HH+HI+HC+HS+rows.length*HR+HT+HF+8;
+  var cv=document.createElement("canvas");
+  cv.width=W*2; cv.height=H*2;
+  var ctx=cv.getContext("2d"); ctx.scale(2,2);
+  var y=0;
+
+  function rr(x,y,w,h,r){
+    ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);
+    ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);
+    ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);
+    ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);
+    ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();
+  }
+
+  var li=new Image();
+  li.onload=function(){
+    // Header
+    ctx.fillStyle="#1565C0"; ctx.fillRect(0,y,W,HH);
+    var lh=40,lw=lh*(li.width/li.height);
+    ctx.fillStyle="#fff"; rr(12,y+16,lw+10,lh,5); ctx.fill();
+    ctx.drawImage(li,17,y+21,lw,lh-10);
+    ctx.fillStyle="#fff"; ctx.font="bold 14px Arial";
+    ctx.fillText("Cotizaci\u00f3n N\u00b0 "+nrocot,lw+30,y+30);
+    ctx.font="11px Arial"; ctx.fillStyle="rgba(255,255,255,0.8)";
+    ctx.fillText(fecha,lw+30,y+48); y+=HH;
+
+    // Info
+    ctx.fillStyle="#E3F2FD"; ctx.fillRect(0,y,W,HI);
+    ctx.strokeStyle="#BBDEFB"; ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(0,y+HI);ctx.lineTo(W,y+HI);ctx.stroke();
+    ctx.fillStyle="#212121"; ctx.font="bold 13px Arial";
+    ctx.fillText("Cliente: "+cliente,16,y+20);
+    ctx.font="12px Arial"; ctx.fillStyle="#555";
+    ctx.fillText("Vendedor: "+vendedor,16,y+40); y+=HI;
+
+    // Category
+    ctx.fillStyle="#1565C0"; ctx.fillRect(0,y,W,HC);
+    ctx.fillStyle="#fff"; ctx.font="bold 12px Arial";
+    var cat=c.cat||"";
+    ctx.fillText(cat,16,y+20); y+=HC;
+
+    // Specs
+    if(specs.length){
+      ctx.fillStyle="#f9f9f9"; ctx.fillRect(0,y,W,HS);
+      ctx.fillStyle="#555"; ctx.font="11px Arial";
+      specs.forEach(function(s,i){ctx.fillText("\u2022 "+s,24,y+18+i*24);});
+      y+=HS;
+    }
+
+    // Rows
+    rows.forEach(function(r,i){
+      ctx.fillStyle=i%2===0?"#fff":"#fafafa"; ctx.fillRect(0,y,W,HR);
+      ctx.strokeStyle="#eee"; ctx.lineWidth=1;
+      ctx.beginPath();ctx.moveTo(0,y+HR);ctx.lineTo(W,y+HR);ctx.stroke();
+      ctx.fillStyle=r.cl; ctx.font=(r.l.startsWith("Precio base")||r.l.startsWith("Subtotal")?"bold ":"")+"13px Arial";
+      ctx.fillText(r.l,16,y+22);
+      var vw=ctx.measureText(r.v).width;
+      ctx.fillText(r.v,W-vw-16,y+22);
+      y+=HR;
+    });
+
+    // Total
+    ctx.fillStyle="#1565C0"; ctx.fillRect(0,y,W,HT);
+    ctx.fillStyle="#fff"; ctx.font="13px Arial";
+    ctx.fillText("TOTAL",16,y+26);
+    ctx.font="bold 26px Arial";
+    var tw=ctx.measureText(fmt(c.fin)).width;
+    ctx.fillText(fmt(c.fin),W-tw-16,y+46); y+=HT;
+
+    // Footer
+    ctx.fillStyle="#f5f5f5"; ctx.fillRect(0,y,W,HF);
+    ctx.fillStyle="#9e9e9e"; ctx.font="10px Arial";
+    var ft="Implementos Lecar S.R.L.  -  Armstrong, Santa Fe  -  "+tel;
+    var fw=ctx.measureText(ft).width; ctx.fillText(ft,(W-fw)/2,y+19);
+
+    // Export to PDF
+    var imgData=cv.toDataURL("image/png");
+    var pdfW=W*0.75, pdfH=H*0.75; // convert px to pt approx
+    var {jsPDF}=window.jspdf;
+    var doc=new jsPDF({orientation:pdfH>pdfW?"portrait":"landscape",unit:"pt",format:[pdfW,pdfH]});
+    doc.addImage(imgData,"PNG",0,0,pdfW,pdfH);
+    var nr=document.getElementById("nrocot").value||"cot";
+    var cl2=document.getElementById("cliente").value||"cliente";
+    doc.save("Cotizacion_Lecar_"+nr+"_"+cl2+".pdf");
+  };
+  li.src=LOGO_URL;
+}
+
+function closeOv(){document.getElementById("ov").classList.remove("show");}
+
+function doMail(){
+  confirmarNum();
+  saveToSheets("email");
+  var c=window._lc;
+  if(!c){alert("Complet\u00e1 la cotizaci\u00f3n primero.");return;}
+  var nr=document.getElementById("nrocot").value||"\u2014";
+  var cl=document.getElementById("cliente").value||"\u2014";
+  var body="Cotizaci\u00f3n Lecar N\u00b0 "+nr+"\nFecha: "+document.getElementById("fecha").value+"\nCliente: "+cl+"\nVendedor: "+gVN()+"\n\n";
+  body+="Producto: "+c.cat+" - "+c.v.n+"\nPrecio base: "+fmt(c.base)+"\n";
+  if(c.v.specs && c.v.specs.length) body+="Specs: "+c.v.specs.join(", ")+"\n";
+  c.labs.forEach(function(o){body+=o.n+": "+(o.p<0?"- ":"+ ")+fmt(Math.abs(o.p))+"\n";});
+  espItems.forEach(function(e){body+=e.desc+": + "+fmt(e.p)+"\n";});
+  var QTY_LBL2={llanta:"Dif. llanta 17",baul:"Baúl lateral",baul155:"Baúl lateral 1.55m",lucesVolc:"Dif. luces volcador",lucesTolva:"Dif. luces tolva grande"};
+  Object.keys(QTY).forEach(function(k){
+    if(QTY[k]>0){
+      var lbl=(QTY_LBL2[k]||k)+(QTY[k]>1?" x"+QTY[k]:"");
+      body+=lbl+": + "+fmt(QTY[k]*QTY_PRICE[k])+"\n";
+    }
+  });
+  if(c.tot!==0) body+="Subtotal: "+fmt(c.sub)+"\n";
+  if(c.d1>0) body+="Descuento: - "+fmt(c.d1)+"\n";
+  if(c.d2>0) body+="Desc. contado: - "+fmt(c.d2)+"\n";
+  if(iva==="mas") body+="IVA (+10.5%): + "+fmt(c.ivaV)+"\n";
+  var fpSel=document.getElementById("forma-pago");
+  var fpTxt=fpSel&&fpSel.value?fpSel.options[fpSel.selectedIndex].text:"";
+  var dpSel=document.getElementById("disponibilidad");
+  var dpTxt=dpSel&&dpSel.value?dpSel.options[dpSel.selectedIndex].text:"";
+  if(fpTxt) body+="\nForma de pago: "+fpTxt;
+  if(dpTxt) body+="\nDisponibilidad: "+dpTxt;
+  body+="\n\nPRECIO: "+fmt(c.fin)+" ("+c.ivaTag+")\n\nImplementos Lecar S.R.L. - Armstrong, Santa Fe - "+gVT();
+  window.location.href="mailto:?subject="+encodeURIComponent("Cotizaci\u00f3n Lecar N\u00b0 "+nr+" - "+cl)+"&body="+encodeURIComponent(body);
+}
+
+function onFormaPago(){
+  var v=document.getElementById("forma-pago").value;
+  var prev=document.getElementById("fp-preview");
+  if(!v){prev.style.display="none";return;}
+  var sel=document.getElementById("forma-pago");
+  var label=sel.options[sel.selectedIndex].text;
+  prev.style.display="block";
+  prev.innerHTML="&#128179; "+label;
+  calc();
+}
+
+function onDisponibilidad(){
+  var v=document.getElementById("disponibilidad").value;
+  var prev=document.getElementById("disp-preview");
+  if(!v){prev.style.display="none";return;}
+  var sel=document.getElementById("disponibilidad");
+  var label=sel.options[sel.selectedIndex].text;
+  prev.style.display="block";
+  if(v==="disponible"){
+    prev.style.background="var(--gnl)";prev.style.color="var(--gn)";
+  } else if(v==="mas100dias"){
+    prev.style.background="#FFF3E0";prev.style.color="#E65100";
+  } else {
+    prev.style.background="var(--bll)";prev.style.color="var(--bl)";
+  }
+  prev.innerHTML="&#128197; "+label;
+}
+
+function doReset(){
+
+  ["cliente","nrocot","telefono","localidad"].forEach(function(id){document.getElementById(id).value="";});
+  document.getElementById("vendedor").value="";
+  (function(){
+  var d=new Date();
+  var dd=String(d.getDate()).padStart(2,"0");
+  var mm=String(d.getMonth()+1).padStart(2,"0");
+  var yyyy=d.getFullYear();
+  document.getElementById("fecha").value=dd+"-"+mm+"-"+yyyy;
+})();
+  document.querySelectorAll(".pill").forEach(function(p){p.classList.remove("on","on-neg");});
+  document.querySelectorAll(".bopt").forEach(function(b){b.classList.remove("on");});
+  document.querySelector('.bopt[data-v="lista"]').classList.add("on");
+  tipo="lista";
+  document.querySelectorAll(".biva").forEach(function(b){b.classList.remove("on");});
+  document.querySelector('.biva[data-v="sin"]').classList.add("on");
+  iva="sin";
+  // Limpiar items especiales
+  espItems=[];
+  renderEsp();
+  // Limpiar otros costos
+  occItems=[];
+  renderOcc();
+  // Limpiar llantas, bauleras y luces
+  resetQty();
+  // Save current number and load next
+  var v=document.getElementById("vendedor").value;
+  if(v){
+    var pending=document.getElementById("nrocot").getAttribute("data-pending");
+    if(pending) saveNum(v,parseInt(pending,10));
+    var next=getNextNum(v);
+    document.getElementById("nrocot").value=fmtCot(v,next);
+    document.getElementById("nrocot").setAttribute("data-pending",next);
+  }
+  // Reset forma de pago y disponibilidad
+  var fp=document.getElementById("forma-pago");
+  var dp=document.getElementById("disponibilidad");
+  if(fp){fp.value="";document.getElementById("fp-preview").style.display="none";}
+  if(dp){dp.value="";document.getElementById("disp-preview").style.display="none";}
+  // Reset custom product
+  var cn=document.getElementById("custom-nombre");
+  var cd=document.getElementById("custom-desc");
+  var cp=document.getElementById("custom-precio");
+  var cv=document.getElementById("custom-preview");
+  if(cn) cn.value=""; if(cd) cd.value=""; if(cp) cp.value="";
+  if(cv) cv.style.display="none";
+  var dc=DB.find(function(x){return x.cat.indexOf("Producto personalizado")>-1;});
+  if(dc){dc.vars[0].n="Personalizado";dc.vars[0].p=0;}
+  document.getElementById("custom-card").style.display="none";
+  onVar();
+}
+
+onCat();
+</script>
+</body>
+</html>
